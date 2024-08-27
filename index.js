@@ -20,15 +20,6 @@ const KEY_AGENCIA = "883F81F3-32BF-4A1F-BE1D-71E93E900832";
 app.post('/webhook', async (req, res) => {
     const { name, email, phone, google_ads } = req.body;
 
-    // Validações básicas
-    if (!name || !email || !phone) {
-        return res.status(400).send({ error: "Nome, email e telefone são obrigatórios." });
-    }
-
-    if (phone.length < 10) {
-        return res.status(400).send({ error: "Telefone inválido. Deve conter pelo menos 10 dígitos." });
-    }
-
     const body = {
         Key: KEY,
         CanalKey: CANAL_KEY,
