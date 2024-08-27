@@ -29,13 +29,13 @@ function extractPhoneData(phone) {
 
 // Rota para o webhook
 app.post('/webhook', async (req, res) => {
-    const { name, email, phone } = req.body;
+    // Extraímos os dados essenciais do payload
+    const name = req.body.name || req.body['Full Name'] || req.body['FirstName LastName'] || "Nome Desconhecido";
+    const email = req.body.email || req.body['User Email'] || "email@desconhecido.com";
+    let phone = req.body.phone || req.body['User Phone'] || "";
 
-    // Verifica se os campos necessários estão presentes
-    if (!name || !email || !phone) {
-        console.error("Erro: Dados incompletos recebidos. Nome, email e telefone são necessários.");
-        return res.status(400).send({ error: "Nome, email e telefone são obrigatórios." });
-    }
+    // Limpeza do número de telefone para remover caracteres como "+"
+    phone = phone.replace(/\D/g, ''); // Remove todos os caracteres que não são dígitos
 
     // Extrai DDD e número do telefone
     const { DDD, Numero } = extractPhoneData(phone);
