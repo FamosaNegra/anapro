@@ -29,10 +29,10 @@ function extractPhoneData(phone) {
 
 // Rota para o webhook
 app.post('/webhook', async (req, res) => {
-    // Extraímos os dados essenciais do payload
-    const name = req.body.name || req.body['Full Name'] || req.body['FirstName LastName'] || "Nome Desconhecido";
-    const email = req.body.email || req.body['User Email'] || "email@desconhecido.com";
-    let phone = req.body.phone || req.body['User Phone'] || "";
+    // Mapeando os campos recebidos para os campos esperados pelo Anapro
+    const name = req.body.user_column_data_0_string_value || "Nome Desconhecido";
+    const email = req.body.user_column_data_1_string_value || "email@desconhecido.com";
+    let phone = req.body.user_column_data_2_string_value || "";
 
     // Limpeza do número de telefone para remover caracteres como "+"
     phone = phone.replace(/\D/g, ''); // Remove todos os caracteres que não são dígitos
