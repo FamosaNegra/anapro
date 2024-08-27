@@ -16,9 +16,29 @@ const CAMPANHA_KEY = "T8Ds8DuFA781";
 const KEY_INTEGRADORA = "883F81F3-32BF-4A1F-BE1D-71E93E900832";
 const KEY_AGENCIA = "883F81F3-32BF-4A1F-BE1D-71E93E900832";
 
+// Função auxiliar para extrair DDD e número de telefone
+function extractPhoneData(phone) {
+    if (!phone || typeof phone !== 'string' || phone.length < 3) {
+        return { DDD: "", Numero: "" };
+    }
+    return {
+        DDD: phone.slice(0, 2),
+        Numero: phone.slice(2),
+    };
+}
+
 // Rota para o webhook
 app.post('/webhook', async (req, res) => {
-    const { name, email, phone, google_ads } = req.body;
+    const { name, email, phone } = req.body;
+
+    // Verifica se os campos necessários estão presentes
+    if (!name || !email || !phone) {
+        console.error("Erro: Dados incompletos recebidos. Nome, email e telefone são necessários.");
+        return res.status(400).send({ error: "Nome, email e telefone são obrigatórios." });
+    }
+
+    // Extrai DDD e número do telefone
+    const { DDD, Numero } = extractPhoneData(phone);
 
     const body = {
         Key: KEY,
@@ -29,12 +49,10 @@ app.post('/webhook', async (req, res) => {
         PessoaEmail: email,
         KeyIntegradora: KEY_INTEGRADORA,
         KeyAgencia: KEY_AGENCIA,
-        Midia: google_ads?.utmSource || "site-organico",
-        Peca: google_ads?.utmCampaign || null,
         PessoaTelefones: [
             {
-                DDD: phone.slice(0, 2),
-                Numero: phone.slice(2),
+                DDD,
+                Numero,
             },
         ],
     };
