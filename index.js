@@ -27,12 +27,20 @@ function extractPhoneData(phone) {
     };
 }
 
+// Função auxiliar para extrair os dados do user_column_data
+function extractUserData(userColumnData, columnId) {
+    const data = userColumnData.find(item => item.column_id === columnId);
+    return data ? data.string_value : "";
+}
+
 // Rota para o webhook
 app.post('/webhook', async (req, res) => {
-    // Mapeando os campos recebidos para os campos esperados pelo Anapro
-    const name = req.body.user_column_data_0_string_value || "Nome Desconhecido";
-    const email = req.body.user_column_data_1_string_value || "email@desconhecido.com";
-    let phone = req.body.user_column_data_2_string_value || "";
+    const userColumnData = req.body.user_column_data || [];
+
+    // Extraímos os dados usando o column_id
+    const name = extractUserData(userColumnData, "FULL_NAME") || "Nome Desconhecido";
+    const email = extractUserData(userColumnData, "EMAIL") || "email@desconhecido.com";
+    let phone = extractUserData(userColumnData, "PHONE_NUMBER") || "";
 
     // Limpeza do número de telefone para remover caracteres como "+"
     phone = phone.replace(/\D/g, ''); // Remove todos os caracteres que não são dígitos
