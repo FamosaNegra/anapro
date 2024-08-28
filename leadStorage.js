@@ -1,8 +1,7 @@
+// leadStorage.js
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import nodemailer from 'nodemailer';
-import cron from 'node-cron';
 
 // Configuração para obter o diretório atual em módulos ES
 const __filename = fileURLToPath(import.meta.url);
@@ -42,45 +41,3 @@ export function storeLeadDaily(lead) {
 
     fs.writeFileSync(filePath, JSON.stringify(leadsArray, null, 2));
 }
-
-// Função para enviar o arquivo JSON diário por e-mail
-function sendDailyEmail() {
-    const date = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
-    const fileName = `${date}.json`;
-    const filePath = path.join(__dirname, fileName);
-
-    // Configuração do transporte de e-mail (usando Gmail como exemplo)
-    const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: 'your.email@gmail.com', // Substitua pelo seu email
-            pass: 'yourpassword',         // Substitua pela sua senha ou use OAuth2
-        },
-    });
-
-    const mailOptions = {
-        from: 'your.email@gmail.com',    // Substitua pelo seu email
-        to: 'recipient.email@example.com', // Substitua pelo email do destinatário
-        subject: `Leads do dia ${date}`,
-        text: `Em anexo, os leads coletados no dia ${date}.`,
-        attachments: [
-            {
-                filename: fileName,
-                path: filePath,
-            },
-        ],
-    };
-
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            console.error("Erro ao enviar e-mail:", error);
-        } else {
-            console.log("E-mail enviado:", info.response);
-        }
-    });
-}
-
-// Agendar o envio do e-mail às 23:59 todos os dias
-cron.schedule('59 23 * * *', () => {
-    sendDailyEmail();
-});
