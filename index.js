@@ -15,7 +15,7 @@ const CANAL_KEY = "7aTeATm50Tk1";
 const CAMPANHA_KEY = "T8Ds8DuFA781";
 const KEY_INTEGRADORA = "883F81F3-32BF-4A1F-BE1D-71E93E900832";
 const KEY_AGENCIA = "883F81F3-32BF-4A1F-BE1D-71E93E900832";
-const MIDIA = "google_ads";
+const MIDIA = "google-ads";
 const PECA = "Webhook"
 // Função auxiliar para extrair DDD e número de telefone
 function extractPhoneData(phone) {
