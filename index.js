@@ -67,6 +67,8 @@ app.post('/webhook', async (req, res) => {
         KeyAgencia: KEY_AGENCIA,
         PessoaTelefones: pessoaTelefones,
         Data: new Date().toISOString(), // Adicionando a data e hora ao corpo do envio
+        Midia: "google-ads",
+        Peca: "webhook",
     };
 
     try {
