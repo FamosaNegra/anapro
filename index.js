@@ -92,6 +92,21 @@ app.post('/webhook', async (req, res) => {
     }
 });
 
+app.post('/send-to-sheets', (req, res) => {
+    const googleScriptUrl = 'https://docs.google.com/spreadsheets/d/1rOXuiaG9ND0KNkrEABS8gFavkVV1yVrDJs-3dwuPvEY/edit';
+
+    request.post({
+        url: googleScriptUrl,
+        json: req.body
+    }, (error, response, body) => {
+        if (!error && response.statusCode === 200) {
+            res.status(200).send(body);
+        } else {
+            res.status(500).send({ error: 'Failed to send data' });
+        }
+    });
+});
+
 // Inicia o servidor
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
