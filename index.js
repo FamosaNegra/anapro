@@ -93,7 +93,7 @@ app.post('/webhook', async (req, res) => {
 });
 
 app.post('/send-to-sheets', (req, res) => {
-    const googleScriptUrl = 'https://docs.google.com/spreadsheets/d/1rOXuiaG9ND0KNkrEABS8gFavkVV1yVrDJs-3dwuPvEY/edit';
+    const googleScriptUrl = 'https://script.google.com/macros/s/AKfycbz0rPNzUh-9tqZnV294Al2BMiNd99oWtW9-D3k2rg0zPdgp1UnmRp6POvAlESoC9_k/exec';
 
     request.post({
         url: googleScriptUrl,
