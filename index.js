@@ -92,29 +92,6 @@ app.post('/webhook', async (req, res) => {
     }
 });
 
-app.post('/send-to-sheets', async (req, res) => { 
-    const googleScriptUrl = 'https://script.google.com/macros/s/AKfycbz0rPNzUh-9tqZnV294Al2BMiNd99oWtW9-D3k2rg0zPdgp1UnmRp6POvAlESoC9_k/exec';
-
-    try {
-        const response = await fetch(googleScriptUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(req.body)
-        });
-
-        if (response.ok) {
-            const responseBody = await response.json();
-            res.status(200).send(responseBody);
-        } else {
-            res.status(response.status).send({ error: 'Failed to send data to Google Sheets' });
-        }
-    } catch (error) {
-        console.error(error);
-        res.status(500).send({ error: 'Server error while sending data to Google Sheets' });
-    }
-});
 
 // Inicia o servidor
 app.listen(PORT, () => {
