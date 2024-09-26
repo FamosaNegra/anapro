@@ -1,11 +1,14 @@
 import express from "express";
 import bodyParser from "body-parser";
+import cors from "cors"; // Importa o middleware CORS
 import fetch from "node-fetch";
 import { createClient } from "@supabase/supabase-js";
-// import { createSupabase } from "./lib/supabase";
 
 const app = express();
 const PORT = 4000;
+
+// Middleware para CORS
+app.use(cors({ origin: 'https://anapro.metrocasa.com.br' })); // Adiciona o middleware para permitir CORS em todas as rotas
 
 // Middleware para parsear o corpo das requisições como JSON
 app.use(bodyParser.json());
@@ -98,16 +101,8 @@ app.post("/webhook", async (req, res) => {
 });
 
 // RECLAME & LGPD
-// type ValuesProps = {
-//   name: string;
-//   phone: string;
-//   email: string;
-//   reclamation: string;
-// };
-
 export const createSupabase = () => {
   const supabaseUrl = "https://mxdyiwlpvxbfoyxbvoxd.supabase.co";
-  // const supabaseKey = process.env.SUPABASE_KEY!;
   const supabaseKey =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im14ZHlpd2xwdnhiZm95eGJ2b3hkIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTk1NDI2MjAsImV4cCI6MjAxNTExODYyMH0.-mUdNG4nGkr0sH14lLpbERTxuhDsqV_IazCfl3ZjKx8";
   const supabase = createClient(supabaseUrl, supabaseKey);
@@ -131,11 +126,6 @@ app.post("/lgpd", async (req, res) => {
   }
 
   return res.status(200).json({ message: "success", data });
-});
-
-const port = 3000;
-app.listen(port, () => {
-  console.log(`Servidor rodando em http://localhost:${port}`);
 });
 
 app.post("/reclame", async (req, res) => {
