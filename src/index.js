@@ -7,7 +7,7 @@ import { createClient } from "@supabase/supabase-js";
 const app = express();
 const PORT = 4000;
 
-// Middleware para CORS
+// Middleware para CORS com origem específica
 app.use(cors({ origin: 'https://homologacao.metrocasa.com.br' })); // Adiciona o middleware para permitir CORS em todas as rotas
 
 // Middleware para parsear o corpo das requisições como JSON
@@ -100,7 +100,8 @@ app.post("/webhook", async (req, res) => {
   }
 });
 
-
+// Resposta para a requisição OPTIONS (pré-voo)
+app.options("/lgpd", cors()); // Responde a requisições OPTIONS automaticamente
 
 // RECLAME & LGPD
 export const createSupabase = () => {
