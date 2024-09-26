@@ -7,20 +7,24 @@ import { createClient } from "@supabase/supabase-js";
 const app = express();
 const PORT = 4000;
 
+// Atualização das opções CORS, incluindo o subdomínio 'www'
 const corsOptions = {
   credentials: true,
-  origin: ['https://www.homologacao.metrocasa.com.br', 'https://metrocasa.com.br'] 
+  origin: [
+    'https://homologacao.metrocasa.com.br', 
+    'https://metrocasa.com.br', 
+    'https://www.homologacao.metrocasa.com.br'
+  ]
 };
 
-app.use(cors(corsOptions)); 
-
+// Aplicando o CORS globalmente
+app.use(cors(corsOptions));
 
 // Middleware para parsear o corpo das requisições como JSON
 app.use(bodyParser.json());
 
 // Configuração das chaves e URL do endpoint do Anapro
-const ANAPRO_ENDPOINT =
-  "https://crm.anapro.com.br/webcrm/webapi/integracao/v2/CadastrarProspect";
+const ANAPRO_ENDPOINT = "https://crm.anapro.com.br/webcrm/webapi/integracao/v2/CadastrarProspect";
 const KEY = "wz2O9Z9BawY1";
 const CANAL_KEY = "7aTeATm50Tk1";
 const CAMPANHA_KEY = "T8Ds8DuFA781";
@@ -29,20 +33,14 @@ const KEY_AGENCIA = "883F81F3-32BF-4A1F-BE1D-71E93E900832";
 
 // Função auxiliar para extrair DDD e número de telefone
 function extractPhoneData(phone) {
-  // Remove todos os caracteres que não são dígitos
   const phoneClean = phone.replace(/\D/g, "");
-
-  // Verifica se o telefone tem o código de país do Brasil +55
   if (phoneClean.startsWith("55") && phoneClean.length > 11) {
-    phone = phoneClean.slice(2); // Remove o código do país
+    phone = phoneClean.slice(2);
   } else {
     phone = phoneClean;
   }
-
-  // Extrai o DDD (2 primeiros dígitos após o código do país) e o número restante
   const DDD = phone.length >= 10 ? phone.slice(0, 2) : null;
   const Numero = phone.length >= 10 ? phone.slice(2) : phone;
-
   return { DDD, Numero };
 }
 
@@ -55,18 +53,10 @@ function extractUserData(userColumnData, columnId) {
 // Rota para o webhook
 app.post("/webhook", async (req, res) => {
   const userColumnData = req.body.user_column_data || [];
-
-  // Extraímos os dados usando o column_id
-  const name =
-    extractUserData(userColumnData, "FULL_NAME") || "Nome Desconhecido";
-  const email =
-    extractUserData(userColumnData, "EMAIL") || "email@desconhecido.com";
+  const name = extractUserData(userColumnData, "FULL_NAME") || "Nome Desconhecido";
+  const email = extractUserData(userColumnData, "EMAIL") || "email@desconhecido.com";
   let phone = extractUserData(userColumnData, "PHONE_NUMBER") || "";
-
-  // Extraímos o DDD e o número do telefone
   const { DDD, Numero } = extractPhoneData(phone);
-
-  // Se o telefone for inválido (sem DDD e sem número), pode ser registrado como nulo
   const pessoaTelefones = DDD && Numero ? [{ DDD, Numero }] : [];
 
   const body = {
@@ -79,7 +69,7 @@ app.post("/webhook", async (req, res) => {
     KeyIntegradora: KEY_INTEGRADORA,
     KeyAgencia: KEY_AGENCIA,
     PessoaTelefones: pessoaTelefones,
-    Data: new Date().toISOString(), // Adicionando a data e hora ao corpo do envio
+    Data: new Date().toISOString(),
     Midia: "google-ads",
     Peca: "webhook",
   };
@@ -106,21 +96,25 @@ app.post("/webhook", async (req, res) => {
 });
 
 // Resposta para a requisição OPTIONS (pré-voo)
-app.options("/lgpd", cors()); // Responde a requisições OPTIONS automaticamente
+app.options("/lgpd", (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "https://www.homologacao.metrocasa.com.br");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.sendStatus(200);
+});
 
 // RECLAME & LGPD
 export const createSupabase = () => {
   const supabaseUrl = "https://mxdyiwlpvxbfoyxbvoxd.supabase.co";
-  const supabaseKey =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im14ZHlpd2xwdnhiZm95eGJ2b3hkIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTk1NDI2MjAsImV4cCI6MjAxNTExODYyMH0.-mUdNG4nGkr0sH14lLpbERTxuhDsqV_IazCfl3ZjKx8";
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im14ZHlpd2xwdnhiZm95eGJ2b3hkIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTk1NDI2MjAsImV4cCI6MjAxNTExODYyMH0.-mUdNG4nGkr0sH14lLpbERTxuhDsqV_IazCfl3ZjKx8";
   const supabase = createClient(supabaseUrl, supabaseKey);
-
   return supabase;
 };
 
-app.post("/lgpd" ,cors(corsOptions), async (req, res) => {
+// Rota LGPD
+app.post("/lgpd", cors(corsOptions), async (req, res) => {
   const values = req.body;
-
   const supabase = createSupabase();
 
   const { data, error } = await supabase
@@ -136,19 +130,21 @@ app.post("/lgpd" ,cors(corsOptions), async (req, res) => {
   return res.status(200).json({ message: "success", data });
 });
 
-app.post("/reclame", async (req, res) => {
+// Rota Reclame
+app.post("/reclame", cors(corsOptions), async (req, res) => {
   const values = req.body;
-
   const supabase = createSupabase();
 
-  const { data, error } = await supabase.from("LGPD").insert([
-    {
-      Nome: values.name,
-      Email: values.email,
-      Telefone: values.phone,
-      Reclamacao: values.reclamation,
-    },
-  ]);
+  const { data, error } = await supabase
+    .from("LGPD")
+    .insert([
+      {
+        Nome: values.name,
+        Email: values.email,
+        Telefone: values.phone,
+        Reclamacao: values.reclamation,
+      },
+    ]);
 
   if (error) {
     return res.status(500).json({ error });
