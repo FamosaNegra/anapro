@@ -5,7 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 // import { createSupabase } from "./lib/supabase";
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = 4000;
 
 // Middleware para parsear o corpo das requisições como JSON
 app.use(bodyParser.json());
