@@ -7,18 +7,19 @@ import { createClient } from "@supabase/supabase-js";
 const app = express();
 const PORT = 4000;
 
-// Atualização das opções CORS, incluindo o subdomínio 'www'
-const corsOptions = {
-  credentials: true,
-  origin: [
-    'https://homologacao.metrocasa.com.br', 
-    'https://metrocasa.com.br', 
-    'https://www.homologacao.metrocasa.com.br'
-  ]
-};
+app.use(cors());
 
-// Aplicando o CORS globalmente
-app.use(cors(corsOptions));
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "https://www.homologacao.metrocasa.com.br");
+
+  res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
+
+  res.header("Access-Control-Allow-Headers", "Content-Type");
+
+  app.use(cors());
+
+  next();
+});
 
 // Middleware para parsear o corpo das requisições como JSON
 app.use(bodyParser.json());
