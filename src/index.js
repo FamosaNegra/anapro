@@ -9,7 +9,7 @@ const PORT = 4000;
 
 const corsOptions = {
   credentials: true,
-  origin: ['https://homologacao.metrocasa.com.br', 'https://metrocasa.com.br'] 
+  origin: ['https://www.homologacao.metrocasa.com.br', 'https://metrocasa.com.br'] 
 };
 
 app.use(cors(corsOptions)); 
@@ -118,7 +118,7 @@ export const createSupabase = () => {
   return supabase;
 };
 
-app.post("/lgpd", async (req, res) => {
+app.post("/lgpd" ,cors(corsOptions), async (req, res) => {
   const values = req.body;
 
   const supabase = createSupabase();
