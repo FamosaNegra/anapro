@@ -7,25 +7,12 @@ import { createClient } from "@supabase/supabase-js";
 const app = express();
 const PORT = 4000;
 
-// Middleware para CORS com origem específica
+const corsOptions = {
+  credentials: true,
+  origin: ['https://homologacao.metrocasa.com.br', 'https://metrocasa.com.br'] 
+};
 
-app.use((req, res, next) => {
-
-  // Qualquer endereço pode fazer requisição "*"
-  res.header("Access-Control-Allow-Origin", "*");
-
-  // Tipos de método que a API aceita
-  res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
-
-  // Permitir o envio de dados para API
-  res.header("Access-Control-Allow-Headers", "Content-Type");
-
-  // Executar o cors
-  app.use(cors());
-
-  // Quando não houver erro deve continuar o processamento
-  next();
-});
+app.use(cors(corsOptions)); 
 
 
 // Middleware para parsear o corpo das requisições como JSON
