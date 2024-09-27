@@ -152,6 +152,10 @@ app.post("/reclame", async (req, res) => {
   return res.status(200).json({ message: "success", data });
 });
 
+app.get("/teste", async (req, res) => {
+  return res.status(200).json({ req, res });
+});
+
 // Inicia o servidor
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
