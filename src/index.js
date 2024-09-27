@@ -11,6 +11,19 @@ app.use(bodyParser.json());
 
 app.use(cors({ origin: "*", methods: "*" }));
 
+app.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "https://metrocasa.com.br");
+  res.header(
+    "Access-Control-Allow-Origin",
+    "https://www.homologacao.metrocasa.com.br"
+  );
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  next();
+});
+
 const ANAPRO_ENDPOINT =
   "https://crm.anapro.com.br/webcrm/webapi/integracao/v2/CadastrarProspect";
 const KEY = "wz2O9Z9BawY1";
