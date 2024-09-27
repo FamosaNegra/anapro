@@ -7,10 +7,7 @@ import { createClient } from "@supabase/supabase-js";
 const app = express();
 const PORT = 4000;
 
-app.use(bodyParser.json());
-
-app.use(cors({ origin: "*", methods: "*" }));
-
+app.use(cors({ origin: "*", methods: ["OPTIONS", "GET", "POST"] }));
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "https://metrocasa.com.br");
   res.header(
@@ -23,6 +20,8 @@ app.use(function (req, res, next) {
   );
   next();
 });
+
+app.use(bodyParser.json());
 
 const ANAPRO_ENDPOINT =
   "https://crm.anapro.com.br/webcrm/webapi/integracao/v2/CadastrarProspect";
