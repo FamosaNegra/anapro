@@ -9,6 +9,7 @@ const PORT = 4000;
 
 app.use(cors({ origin: "*", methods: ["OPTIONS", "GET", "POST"] }));
 app.use(function (req, res, next) {
+  console.log(res);
   res.header("Access-Control-Allow-Origin", "https://metrocasa.com.br");
   res.header(
     "Access-Control-Allow-Origin",
