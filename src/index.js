@@ -9,7 +9,7 @@ const PORT = 4000;
 
 app.use(bodyParser.json());
 
-app.use(cors({ origin: "https://anapro.metrocasa.com.br", methods: "*" }));
+app.use(cors({ origin: "*", methods: "*" }));
 
 const ANAPRO_ENDPOINT =
   "https://crm.anapro.com.br/webcrm/webapi/integracao/v2/CadastrarProspect";
