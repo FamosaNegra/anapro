@@ -7,13 +7,10 @@ import { createClient } from "@supabase/supabase-js";
 const app = express();
 const PORT = 4000;
 
-// Middleware para CORS
-app.use(cors({ origin: 'https://anapro.metrocasa.com.br' })); // Adiciona o middleware para permitir CORS em todas as rotas
-
-// Middleware para parsear o corpo das requisições como JSON
 app.use(bodyParser.json());
 
-// Configuração das chaves e URL do endpoint do Anapro
+app.use(cors({ origin: "https://anapro.metrocasa.com.br", methods: "*" }));
+
 const ANAPRO_ENDPOINT =
   "https://crm.anapro.com.br/webcrm/webapi/integracao/v2/CadastrarProspect";
 const KEY = "wz2O9Z9BawY1";
@@ -99,16 +96,6 @@ app.post("/webhook", async (req, res) => {
     res.status(500).send({ error: "Erro ao enviar lead" });
   }
 });
-
-// RECLAME & LGPD
-export const createSupabase = () => {
-  const supabaseUrl = "https://mxdyiwlpvxbfoyxbvoxd.supabase.co";
-  const supabaseKey =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im14ZHlpd2xwdnhiZm95eGJ2b3hkIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTk1NDI2MjAsImV4cCI6MjAxNTExODYyMH0.-mUdNG4nGkr0sH14lLpbERTxuhDsqV_IazCfl3ZjKx8";
-  const supabase = createClient(supabaseUrl, supabaseKey);
-
-  return supabase;
-};
 
 app.post("/lgpd", async (req, res) => {
   const values = req.body;
