@@ -9,7 +9,6 @@ const PORT = 4000;
 
 app.use(cors({ origin: "*", methods: ["OPTIONS", "GET", "POST"] }));
 app.use(function (req, res, next) {
-  console.log(res);
   res.header("Access-Control-Allow-Origin", "https://metrocasa.com.br");
   res.header(
     "Access-Control-Allow-Origin",
@@ -19,6 +18,7 @@ app.use(function (req, res, next) {
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept"
   );
+  console.log("RES 1", res);
   next();
 });
 
@@ -125,6 +125,8 @@ app.post("/lgpd", async (req, res) => {
     return res.status(500).json({ error });
   }
 
+  console.log("RES 2", res);
+
   return res.status(200).json({ message: "success", data });
 });
 
@@ -146,6 +148,7 @@ app.post("/reclame", async (req, res) => {
     return res.status(500).json({ error });
   }
 
+  console.log("RES 3", res);
   return res.status(200).json({ message: "success", data });
 });
 
