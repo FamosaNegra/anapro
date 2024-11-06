@@ -92,21 +92,13 @@ app.post('/webhook', async (req, res) => {
     }
 });
 
-
 app.post('/black', async (req, res) => {
-    const userColumnData = req.body.user_column_data || [];
-
-    // Extraímos os dados usando o column_id
-    const name = extractUserData(userColumnData, "FULL_NAME") || "Nome Desconhecido";
-    const email = extractUserData(userColumnData, "EMAIL") || "email@desconhecido.com";
-    let phone = extractUserData(userColumnData, "PHONE_NUMBER") || "";
+    const { name, email, whatsapp, cpf, empreendimento } = req.body;
 
     // Extraímos o DDD e o número do telefone
-    const { DDD, Numero } = extractPhoneData(phone);
+    const { DDD, Numero } = extractPhoneData(whatsapp);
 
-    // Se o telefone for inválido (sem DDD e sem número), pode ser registrado como nulo
-    const pessoaTelefones = DDD && Numero ? [{ DDD, Numero }] : [];
-
+    // Cria o corpo da requisição para o Anapro
     const body = {
         Key: KEY,
         CanalKey: CANAL_KEY,
@@ -114,10 +106,12 @@ app.post('/black', async (req, res) => {
         PoliticaPrivacidadeKey: "",
         PessoaNome: name,
         PessoaEmail: email,
+        PessoaCPF: cpf,
+        PessoaTelefones: DDD && Numero ? [{ DDD, Numero }] : [],
+        PessoaEmpreendimento: empreendimento,
         KeyIntegradora: KEY_INTEGRADORA,
         KeyAgencia: KEY_AGENCIA,
-        PessoaTelefones: pessoaTelefones,
-        Data: new Date().toISOString(), // Adicionando a data e hora ao corpo do envio
+        Data: new Date().toISOString(), // Adiciona a data e hora
         Midia: "google-ads",
         Peca: "Black-Friday",
     };
@@ -132,7 +126,7 @@ app.post('/black', async (req, res) => {
         });
 
         if (!response.ok) {
-            throw new Error("Failed to submit form");
+            throw new Error("Erro ao enviar lead");
         }
 
         console.log("Lead enviado com sucesso:", body);
