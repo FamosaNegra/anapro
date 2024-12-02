@@ -49,6 +49,14 @@ app.post('/webhook', async (req, res) => {
     const name = extractUserData(userColumnData, "FULL_NAME") || "Nome Desconhecido";
     const email = extractUserData(userColumnData, "EMAIL") || "email@desconhecido.com";
     let phone = extractUserData(userColumnData, "PHONE_NUMBER") || "";
+    
+    // Verifica e extrai o valor de user_column_data_0_string_value
+    const observacao = req.body?.user_column_data_0_string_value || "";
+
+    // Condição para filtrar "Não quero Comprar" e "Quero Alugar"
+    const observacoesValidadas = (observacao === "Não quero Comprar" || observacao === "Quero Alugar") 
+        ? "" 
+        : observacao;
 
     // Extraímos o DDD e o número do telefone
     const { DDD, Numero } = extractPhoneData(phone);
@@ -69,6 +77,7 @@ app.post('/webhook', async (req, res) => {
         Data: new Date().toISOString(), // Adicionando a data e hora ao corpo do envio
         Midia: "google-ads",
         Peca: "webhook",
+        Observacoes: observacoesValidadas // Atualizado para usar o campo validado
     };
 
     try {
@@ -82,51 +91,6 @@ app.post('/webhook', async (req, res) => {
 
         if (!response.ok) {
             throw new Error("Failed to submit form");
-        }
-
-        console.log("Lead enviado com sucesso:", body);
-        res.status(200).send({ message: "Lead enviado com sucesso!" });
-    } catch (error) {
-        console.error("Erro ao enviar lead:", error);
-        res.status(500).send({ error: "Erro ao enviar lead" });
-    }
-});
-
-app.post('/black', async (req, res) => {
-    const { name, email, whatsapp, cpf, empreendimento } = req.body;
-
-    // Extraímos o DDD e o número do telefone
-    const { DDD, Numero } = extractPhoneData(whatsapp);
-
-    // Cria o corpo da requisição para o Anapro
-    const body = {
-        Key: KEY,
-        CanalKey: CANAL_KEY,
-        CampanhaKey: CAMPANHA_KEY,
-        PoliticaPrivacidadeKey: "",
-        PessoaNome: name,
-        PessoaEmail: email,
-        PessoaCPF: cpf,
-        PessoaTelefones: DDD && Numero ? [{ DDD, Numero }] : [],
-        PessoaEmpreendimento: empreendimento,
-        KeyIntegradora: KEY_INTEGRADORA,
-        KeyAgencia: KEY_AGENCIA,
-        Data: new Date().toISOString(), // Adiciona a data e hora
-        Midia: "google-ads",
-        Peca: "Black-Friday",
-    };
-
-    try {
-        const response = await fetch(ANAPRO_ENDPOINT, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(body),
-        });
-
-        if (!response.ok) {
-            throw new Error("Erro ao enviar lead");
         }
 
         console.log("Lead enviado com sucesso:", body);
