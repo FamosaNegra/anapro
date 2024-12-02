@@ -45,18 +45,19 @@ function extractUserData(userColumnData, columnId) {
 app.post('/webhook', async (req, res) => {
     const userColumnData = req.body.user_column_data || [];
 
+    // Verifica e extrai o valor de user_column_data_0_string_value
+    const observacao = req.body?.user_column_data_0_string_value || "";
+
+    // Impede o envio se a observação for "Não quero Comprar" ou "Quero Alugar"
+    if (observacao === "Não quero Comprar" || observacao === "Quero Alugar") {
+        console.log("Lead não enviado: condição de observação ignorada");
+        return res.status(200).send({ message: "Lead ignorado devido à condição de observação." });
+    }
+
     // Extraímos os dados usando o column_id
     const name = extractUserData(userColumnData, "FULL_NAME") || "Nome Desconhecido";
     const email = extractUserData(userColumnData, "EMAIL") || "email@desconhecido.com";
     let phone = extractUserData(userColumnData, "PHONE_NUMBER") || "";
-    
-    // Verifica e extrai o valor de user_column_data_0_string_value
-    const observacao = req.body?.user_column_data_0_string_value || "";
-
-    // Condição para filtrar "Não quero Comprar" e "Quero Alugar"
-    const observacoesValidadas = (observacao === "Não quero Comprar" || observacao === "Quero Alugar") 
-        ? "" 
-        : observacao;
 
     // Extraímos o DDD e o número do telefone
     const { DDD, Numero } = extractPhoneData(phone);
@@ -77,7 +78,7 @@ app.post('/webhook', async (req, res) => {
         Data: new Date().toISOString(), // Adicionando a data e hora ao corpo do envio
         Midia: "google-ads",
         Peca: "webhook",
-        Observacoes: observacoesValidadas // Atualizado para usar o campo validado
+        Observacoes: observacao // Mantém o valor válido da observação
     };
 
     try {
@@ -100,6 +101,7 @@ app.post('/webhook', async (req, res) => {
         res.status(500).send({ error: "Erro ao enviar lead" });
     }
 });
+
 
 // Inicia o servidor
 app.listen(PORT, () => {
