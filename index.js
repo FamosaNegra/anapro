@@ -39,7 +39,6 @@ function extractPhoneData(phone) {
     return { DDD, Numero };
 }
 
-
 // Função auxiliar para normalizar os dados
 function normalizeLeadData(userColumnData) {
     const normalizedData = {};
@@ -61,6 +60,11 @@ function normalizeLeadData(userColumnData) {
             }
         }
     });
+
+    // Garante que observacao tenha um valor padrão caso não tenha sido mapeada
+    if (!normalizedData.observacao) {
+        normalizedData.observacao = "Sem observações fornecidas";
+    }
 
     return normalizedData;
 }
