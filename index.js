@@ -40,18 +40,19 @@ function normalizeLeadData(userColumnData) {
     const normalizedData = {};
 
     userColumnData.forEach((item) => {
-        const columnName = item.column_name.toLowerCase();
+        if (item.column_name) { // Verifica se column_name existe
+            const columnName = item.column_name.toLowerCase();
 
-        if (columnName.includes('full name')) {
-            normalizedData.name = item.string_value || "Nome Desconhecido";
-        } else if (columnName.includes('email')) {
-            normalizedData.email = item.string_value || "email@desconhecido.com";
-        } else if (columnName.includes('phone')) {
-            normalizedData.phone = item.string_value || "";
-        } else if (columnName.includes('observacao') || columnName.includes('observação') || columnName.includes('que tipo de imóvel')) {
-            normalizedData.observacao = item.string_value || "";
+            if (columnName.includes('full name')) {
+                normalizedData.name = item.string_value || "Nome Desconhecido";
+            } else if (columnName.includes('email')) {
+                normalizedData.email = item.string_value || "email@desconhecido.com";
+            } else if (columnName.includes('phone')) {
+                normalizedData.phone = item.string_value || "";
+            } else if (columnName.includes('observacao') || columnName.includes('observação') || columnName.includes('que tipo de imóvel')) {
+                normalizedData.observacao = item.string_value || "";
+            }
         }
-        // Adicione mais mapeamentos conforme necessário
     });
 
     return normalizedData;
@@ -110,9 +111,6 @@ app.post('/webhook', async (req, res) => {
         res.status(500).send({ error: "Erro ao enviar lead" });
     }
 });
-
-console.log(`Servidor rodando na porta 16-12`);
-
 
 // Inicia o servidor
 app.listen(PORT, () => {
