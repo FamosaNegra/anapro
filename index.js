@@ -111,6 +111,9 @@ app.post('/webhook', async (req, res) => {
     }
 });
 
+console.log(`Servidor rodando na porta 16-12`);
+
+
 // Inicia o servidor
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
