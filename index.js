@@ -49,7 +49,9 @@ function normalizeLeadData(userColumnData) {
                 normalizedData.email = item.string_value || "email@desconhecido.com";
             } else if (columnName.includes('phone')) {
                 normalizedData.phone = item.string_value || "";
-            } else if (columnName.includes('observacao') || columnName.includes('observação') || columnName.includes('que tipo de imóvel')) {
+            } else if (columnName.includes('que tipo de imóvel você está procurando?')) {
+                normalizedData.observacao = item.string_value || "";
+            } else if (columnName.includes('observacao') || columnName.includes('observação')) {
                 normalizedData.observacao = item.string_value || "";
             }
         }
@@ -60,6 +62,9 @@ function normalizeLeadData(userColumnData) {
 
 // Rota para o webhook
 app.post('/webhook', async (req, res) => {
+    // Log do JSON recebido
+    console.log("Dados recebidos do Google:", JSON.stringify(req.body, null, 2));
+
     const userColumnData = req.body.user_column_data || [];
 
     // Normaliza os dados recebidos
@@ -90,6 +95,9 @@ app.post('/webhook', async (req, res) => {
         Peca: "webhook",
         Observacoes: leadData.observacao
     };
+
+    // Log do JSON enviado ao CRM
+    console.log("Dados enviados ao CRM:", JSON.stringify(body, null, 2));
 
     try {
         const response = await fetch(ANAPRO_ENDPOINT, {
