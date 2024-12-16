@@ -41,7 +41,9 @@ function extractPhoneData(phone) {
 
 // Função auxiliar para normalizar os dados
 function normalizeLeadData(userColumnData) {
-    const normalizedData = {};
+    const normalizedData = {
+        observacao: "" // Inicializa observação como vazia
+    };
 
     userColumnData.forEach((item) => {
         if (item.column_name) { // Verifica se column_name existe
@@ -54,9 +56,9 @@ function normalizeLeadData(userColumnData) {
             } else if (columnName.includes('phone')) {
                 normalizedData.phone = item.string_value || "";
             } else if (columnName.includes('que tipo de imóvel você está procurando?')) {
-                normalizedData.observacao = item.string_value || "";
-            } else if (columnName.includes('observacao') || columnName.includes('observação')) {
-                normalizedData.observacao = item.string_value || "";
+                normalizedData.observacao += `Tipo de imóvel: ${item.string_value || "N/A"}. `;
+            } else if (columnName.includes('qual a zona do seu interesse?')) {
+                normalizedData.observacao += `Zona de interesse: ${item.string_value || "N/A"}. `;
             }
         }
     });
@@ -80,7 +82,7 @@ app.post('/webhook', async (req, res) => {
     const leadData = normalizeLeadData(userColumnData);
 
     // Ignora leads com observações indesejadas
-    if (leadData.observacao === "Não quero Comprar" || leadData.observacao === "Quero Alugar") {
+    if (leadData.observacao.includes("Não quero Comprar") || leadData.observacao.includes("Quero Alugar")) {
         console.log("Lead ignorado devido à observação:", leadData.observacao);
         return res.status(200).send({ message: "Lead ignorado." });
     }
