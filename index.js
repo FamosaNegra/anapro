@@ -35,34 +35,43 @@ function extractPhoneData(phone) {
     return { DDD, Numero };
 }
 
-// Função auxiliar para extrair os dados do user_column_data
-function extractUserData(userColumnData, columnId) {
-    const data = userColumnData.find(item => item.column_id === columnId);
-    return data ? data.string_value : "";
+// Função auxiliar para normalizar os dados
+function normalizeLeadData(userColumnData) {
+    const normalizedData = {};
+
+    userColumnData.forEach((item) => {
+        const columnName = item.column_name.toLowerCase();
+
+        if (columnName.includes('full name')) {
+            normalizedData.name = item.string_value || "Nome Desconhecido";
+        } else if (columnName.includes('email')) {
+            normalizedData.email = item.string_value || "email@desconhecido.com";
+        } else if (columnName.includes('phone')) {
+            normalizedData.phone = item.string_value || "";
+        } else if (columnName.includes('observacao') || columnName.includes('observação') || columnName.includes('que tipo de imóvel')) {
+            normalizedData.observacao = item.string_value || "";
+        }
+        // Adicione mais mapeamentos conforme necessário
+    });
+
+    return normalizedData;
 }
 
 // Rota para o webhook
 app.post('/webhook', async (req, res) => {
     const userColumnData = req.body.user_column_data || [];
 
-    // Verifica e extrai o valor de user_column_data_0_string_value
-    const observacao = req.body?.user_column_data_0_string_value || "";
+    // Normaliza os dados recebidos
+    const leadData = normalizeLeadData(userColumnData);
 
-    // Impede o envio se a observação for "Não quero Comprar" ou "Quero Alugar"
-    if (observacao === "Não quero Comprar" || observacao === "Quero Alugar") {
-        console.log("Lead não enviado: condição de observação ignorada");
-        return res.status(200).send({ message: "Lead ignorado devido à condição de observação." });
+    // Ignora leads com observações indesejadas
+    if (leadData.observacao === "Não quero Comprar" || leadData.observacao === "Quero Alugar") {
+        console.log("Lead ignorado devido à observação:", leadData.observacao);
+        return res.status(200).send({ message: "Lead ignorado." });
     }
 
-    // Extraímos os dados usando o column_id
-    const name = extractUserData(userColumnData, "FULL_NAME") || "Nome Desconhecido";
-    const email = extractUserData(userColumnData, "EMAIL") || "email@desconhecido.com";
-    let phone = extractUserData(userColumnData, "PHONE_NUMBER") || "";
-
     // Extraímos o DDD e o número do telefone
-    const { DDD, Numero } = extractPhoneData(phone);
-
-    // Se o telefone for inválido (sem DDD e sem número), pode ser registrado como nulo
+    const { DDD, Numero } = extractPhoneData(leadData.phone);
     const pessoaTelefones = DDD && Numero ? [{ DDD, Numero }] : [];
 
     const body = {
@@ -70,15 +79,15 @@ app.post('/webhook', async (req, res) => {
         CanalKey: CANAL_KEY,
         CampanhaKey: CAMPANHA_KEY,
         PoliticaPrivacidadeKey: "",
-        PessoaNome: name,
-        PessoaEmail: email,
+        PessoaNome: leadData.name,
+        PessoaEmail: leadData.email,
         KeyIntegradora: KEY_INTEGRADORA,
         KeyAgencia: KEY_AGENCIA,
         PessoaTelefones: pessoaTelefones,
-        Data: new Date().toISOString(), // Adicionando a data e hora ao corpo do envio
+        Data: new Date().toISOString(),
         Midia: "google-ads",
         Peca: "webhook",
-        Observacoes: observacao // Mantém o valor válido da observação
+        Observacoes: leadData.observacao
     };
 
     try {
@@ -101,7 +110,6 @@ app.post('/webhook', async (req, res) => {
         res.status(500).send({ error: "Erro ao enviar lead" });
     }
 });
-
 
 // Inicia o servidor
 app.listen(PORT, () => {
