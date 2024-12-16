@@ -18,6 +18,10 @@ const KEY_AGENCIA = "883F81F3-32BF-4A1F-BE1D-71E93E900832";
 
 // Função auxiliar para extrair DDD e número de telefone
 function extractPhoneData(phone) {
+    if (!phone) {
+        return { DDD: null, Numero: null }; // Retorna valores nulos se o telefone for inválido
+    }
+
     // Remove todos os caracteres que não são dígitos
     const phoneClean = phone.replace(/\D/g, '');
     
@@ -34,6 +38,7 @@ function extractPhoneData(phone) {
 
     return { DDD, Numero };
 }
+
 
 // Função auxiliar para normalizar os dados
 function normalizeLeadData(userColumnData) {
