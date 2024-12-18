@@ -131,6 +131,62 @@ app.post('/webhook', async (req, res) => {
     }
 });
 
+// Rota para o RD Station
+app.post('/rdstation', async (req, res) => {
+    // Log do JSON recebido
+    console.log("Dados recebidos do RD Station:", JSON.stringify(req.body, null, 2));
+
+    const { contact, content } = req.body;
+
+    if (!contact || !content) {
+        console.error("Dados inválidos recebidos do RD Station.");
+        return res.status(400).send({ error: "Dados inválidos." });
+    }
+
+    // Extraímos o DDD e o número do telefone
+    const { DDD, Numero } = extractPhoneData(contact.phone);
+    const pessoaTelefones = DDD && Numero ? [{ DDD, Numero }] : [];
+
+    const body = {
+        Key: KEY,
+        CanalKey: CANAL_KEY,
+        CampanhaKey: CAMPANHA_KEY,
+        PoliticaPrivacidadeKey: "",
+        PessoaNome: contact.name || "Nome Desconhecido",
+        PessoaEmail: "", // RD Station não fornece email
+        KeyIntegradora: KEY_INTEGRADORA,
+        KeyAgencia: KEY_AGENCIA,
+        PessoaTelefones: pessoaTelefones,
+        Data: new Date().toISOString(),
+        Midia: "rd-station",
+        Peca: "webhook",
+        Observacoes: content.message || "Sem observações fornecidas"
+    };
+
+    // Log do JSON enviado ao CRM
+    console.log("Dados enviados ao CRM:", JSON.stringify(body, null, 2));
+
+    try {
+        const response = await fetch(ANAPRO_ENDPOINT, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(body),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to submit form");
+        }
+
+        console.log("Lead enviado com sucesso pelo RD Station:", body);
+        res.status(200).send({ message: "Lead enviado com sucesso!" });
+    } catch (error) {
+        console.error("Erro ao enviar lead pelo RD Station:", error);
+        res.status(500).send({ error: "Erro ao enviar lead" });
+    }
+});
+
 // Inicia o servidor
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
