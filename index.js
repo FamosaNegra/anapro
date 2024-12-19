@@ -103,7 +103,7 @@ app.post('/webhook', async (req, res) => {
         PessoaTelefones: pessoaTelefones,
         Data: new Date().toISOString(),
         Midia: "google-ads",
-        Peca: "webhook",
+        Peca: "Webhook-filtro",
         Observacoes: leadData.observacao
     };
 
@@ -153,13 +153,13 @@ app.post('/rdstation', async (req, res) => {
         CampanhaKey: CAMPANHA_KEY,
         PoliticaPrivacidadeKey: "",
         PessoaNome: contact.name || "Nome Desconhecido",
-        PessoaEmail: "", // RD Station não fornece email
+        PessoaEmail: "email@desconhecido.com", // RD Station não fornece email
         KeyIntegradora: KEY_INTEGRADORA,
         KeyAgencia: KEY_AGENCIA,
         PessoaTelefones: pessoaTelefones,
         Data: new Date().toISOString(),
-        Midia: "rd-station",
-        Peca: "webhook",
+        Midia: "Talos-rd",
+        Peca: "webhook-rdstation",
         Observacoes: content.message || "Sem observações fornecidas"
     };
 
@@ -183,6 +183,59 @@ app.post('/rdstation', async (req, res) => {
         res.status(200).send({ message: "Lead enviado com sucesso!" });
     } catch (error) {
         console.error("Erro ao enviar lead pelo RD Station:", error);
+        res.status(500).send({ error: "Erro ao enviar lead" });
+    }
+});
+
+// Rota para o Min Webhook
+app.post('/minwebhook', async (req, res) => {
+    // Log do JSON recebido
+    console.log("Dados recebidos do Min Webhook:", JSON.stringify(req.body, null, 2));
+
+    const userColumnData = req.body.user_column_data || [];
+
+    // Normaliza os dados recebidos
+    const leadData = normalizeLeadData(userColumnData);
+
+    // Extraímos o DDD e o número do telefone
+    const { DDD, Numero } = extractPhoneData(leadData.phone);
+    const pessoaTelefones = DDD && Numero ? [{ DDD, Numero }] : [];
+
+    const body = {
+        Key: KEY,
+        CanalKey: CANAL_KEY,
+        CampanhaKey: CAMPANHA_KEY,
+        PoliticaPrivacidadeKey: "",
+        PessoaNome: leadData.name,
+        PessoaEmail: leadData.email,
+        KeyIntegradora: KEY_INTEGRADORA,
+        KeyAgencia: KEY_AGENCIA,
+        PessoaTelefones: pessoaTelefones,
+        Data: new Date().toISOString(),
+        Midia: "google-ads",
+        Peca: "simple-webhook"
+    };
+
+    // Log do JSON enviado ao CRM
+    console.log("Dados enviados ao CRM pelo Min Webhook:", JSON.stringify(body, null, 2));
+
+    try {
+        const response = await fetch(ANAPRO_ENDPOINT, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(body),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to submit form");
+        }
+
+        console.log("Lead enviado com sucesso pelo Min Webhook:", body);
+        res.status(200).send({ message: "Lead enviado com sucesso!" });
+    } catch (error) {
+        console.error("Erro ao enviar lead pelo Min Webhook:", error);
         res.status(500).send({ error: "Erro ao enviar lead" });
     }
 });
