@@ -187,6 +187,23 @@ app.post('/rdstation', async (req, res) => {
     }
 });
 
+app.post('/ri', (req, res) => {
+    const { PessoaNome, PessoaTelefones } = req.body;
+
+    // Validações simples
+    if (!PessoaNome || !PessoaTelefones) {
+        return res.status(400).json({ error: 'PessoaNome e PessoaTelefones são obrigatórios.' });
+    }
+
+    // Retorna o JSON no formato esperado
+    const response = {
+        PessoaNome: PessoaNome,
+        PessoaTelefones: PessoaTelefones
+    };
+
+    return res.status(200).json(response);
+});
+
 // Rota para o Min Webhook
 app.post('/minwebhook', async (req, res) => {
     // Log do JSON recebido
