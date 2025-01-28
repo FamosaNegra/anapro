@@ -187,23 +187,6 @@ app.post('/rdstation', async (req, res) => {
     }
 });
 
-app.post('/ri', (req, res) => {
-    const { PessoaNome, PessoaTelefones } = req.body;
-
-    // Validações simples
-    if (!PessoaNome || !PessoaTelefones) {
-        return res.status(400).json({ error: 'PessoaNome e PessoaTelefones são obrigatórios.' });
-    }
-
-    // Retorna o JSON no formato esperado
-    const response = {
-        PessoaNome: PessoaNome,
-        PessoaTelefones: PessoaTelefones
-    };
-
-    return res.status(200).json(response);
-});
-
 // Rota para o Min Webhook
 app.post('/minwebhook', async (req, res) => {
     // Log do JSON recebido
@@ -256,6 +239,67 @@ app.post('/minwebhook', async (req, res) => {
         res.status(500).send({ error: "Erro ao enviar lead" });
     }
 });
+
+app.post('/ri', async (req, res) => {
+    // Log do JSON recebido
+    console.log("Dados recebidos na rota /ri:", JSON.stringify(req.body, null, 2));
+
+    const { PessoaNome, PessoaTelefones } = req.body;
+
+    // Verifica se os dados essenciais foram fornecidos
+    if (!PessoaNome || !PessoaTelefones) {
+        console.error("Dados inválidos. Verifique o nome e os telefones.");
+        return res.status(400).send({ error: "Dados inválidos. Certifique-se de incluir PessoaNome e PessoaTelefones." });
+    }
+
+    // Formatação do telefone
+    const formattedTelefones = [{
+        Tipo: 0,
+        DDD: PessoaTelefones.slice(0, 2), // Extrai DDD (primeiros 2 dígitos)
+        Numero: PessoaTelefones.slice(2), // Extrai o número restante
+        Ramal: null,
+    }];
+
+    // Montagem do objeto a ser enviado ao CRM
+    const body = {
+        Key: "wz2O9Z9BawY1",
+        CanalKey: "7aTeATm50Tk1",
+        CampanhaKey: "T8Ds8DuFA781",
+        PoliticaPrivacidadeKey: "",
+        KeyIntegradora: "883F81F3-32BF-4A1F-BE1D-71E93E900832",
+        KeyAgencia: "883F81F3-32BF-4A1F-BE1D-71E93E900832",
+        PessoaNome: PessoaNome,  // Certificando que o nome está sendo passado corretamente
+        PessoaTelefones: formattedTelefones,  // Garantindo o formato correto do telefone
+        Data: new Date().toISOString(),
+        Midia: "google-ads",
+        Peca: "Webhook-filtro",
+        Observacoes: "Sem observações fornecidas",
+    };
+
+    // Log do JSON enviado ao CRM
+    console.log("Dados enviados ao CRM:", JSON.stringify(body, null, 2));
+
+    try {
+        const response = await fetch(ANAPRO_ENDPOINT, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(body),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to submit form");
+        }
+
+        console.log("Dados enviados com sucesso ao CRM:", body);
+        res.status(200).send({ message: "Dados enviados com sucesso!" });
+    } catch (error) {
+        console.error("Erro ao enviar os dados ao CRM:", error);
+        res.status(500).send({ error: "Erro ao enviar os dados." });
+    }
+});
+
 
 // Inicia o servidor
 app.listen(PORT, () => {
